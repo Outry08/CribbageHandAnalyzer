@@ -5,17 +5,10 @@ A tool to analyze card hands in the game of cribbage. Analyzes the odds of getti
 An in-depth paragraph about your project and overview of use.
 
 ### Executing program
-
-* How to build and run the program
-* Step-by-step bullets
-```
-use code blocks for commands
-```
-* include the expected output
+* Run 'make' command
+* Run program with ./crib
 
 ## Limitations
-
-What isn't done? What things cause errors?  
 
 ## Author Information
 Ryan McKinnon - rmckinno@uoguelph.ca
