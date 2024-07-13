@@ -7,20 +7,20 @@ class Card {
     int value;
     string suit;
     string icon;
-    int sortValue;
+    int rank;
     bool cutCard;
 
     public:
     Card() {
         value = -1;
-        sortValue = -1;
+        rank = -1;
         suit = "💣";
         icon = "💣";
         cutCard = false;
     }
     Card(bool cut) {
         value = -1;
-        sortValue = -1;
+        rank = -1;
         suit = "💣";
         icon = "💣";
         cutCard = cut;
@@ -38,11 +38,11 @@ class Card {
 
         suit = su;
         value = iconToValue(ico);
-        sortValue = iconToSortValue(ico);
+        rank = iconToRank(ico);
         cutCard = false;
     }
     Card(int val, string su) {
-        sortValue = val;
+        rank = val;
 
         if(su == "c" || su == "C")
             su = "♣";
@@ -54,7 +54,7 @@ class Card {
             su = "♦";
 
         suit = su;
-        icon = sortValueToIcon(val);
+        icon = rankToIcon(val);
         value = iconToValue(icon);
         cutCard = false;
     }
@@ -71,11 +71,11 @@ class Card {
 
         suit = su;
         value = iconToValue(ico);
-        sortValue = iconToSortValue(ico);
+        rank = iconToRank(ico);
         cutCard = cut;
     }
     Card(int val, string su, bool cut) {
-        sortValue = val;
+        rank = val;
 
         if(su == "c" || su == "C")
             su = "♣";
@@ -87,7 +87,7 @@ class Card {
             su = "♦";
 
         suit = su;
-        icon = sortValueToIcon(val);
+        icon = rankToIcon(val);
         value = iconToValue(icon);
         cutCard = cut;
     }
@@ -97,18 +97,25 @@ class Card {
     }
     void setValue(int val) {
         value = val;
-        sortValue = val;
+        rank = val;
     }
 
-    int getSortValue() {
-        return sortValue;
+    int getRank() {
+        return rank;
     }
 
     string getSuit() {
         return suit;
     }
     void setSuit(string s) {
-        suit = s;
+        if(s == "c" || s == "C" || s == "♣")
+            suit = "♣";
+        else if(s == "s" || s == "S" || s == "♠")
+            suit = "♠";
+        else if(s == "h" || s == "H" || s == "♥")
+            suit = "♥";
+        else if(s == "d" || s == "D" || s == "♦")
+            suit = "♦";
     }
     bool isClub() {
         return getSuit() == "♣";
@@ -129,7 +136,7 @@ class Card {
     void setIcon(string i) {
         icon = i;
         value = iconToValue(i);
-        sortValue = iconToSortValue(i);
+        rank = iconToRank(i);
     }
 
     bool isCutCard() {
@@ -150,7 +157,7 @@ class Card {
 
     }
 
-    int iconToSortValue(string ico) {
+    int iconToRank(string ico) {
 
         if(icon == "J")
             return 11;
@@ -165,17 +172,17 @@ class Card {
 
     }
 
-    string sortValueToIcon(int sortValue) {
-        if(sortValue == 11)
+    string rankToIcon(int rank) {
+        if(rank == 11)
             return "J";
-        else if(sortValue == 12)
+        else if(rank == 12)
             return "Q";
-        else if(sortValue == 13)
+        else if(rank == 13)
             return "K";
-        else if(sortValue == 1)
+        else if(rank == 1)
             return "A";
         else
-            return to_string(sortValue);
+            return to_string(rank);
     }
 
     std::string toString() {

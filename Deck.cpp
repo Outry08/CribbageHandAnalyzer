@@ -54,6 +54,14 @@ class Deck {
         return Card("Error", "Err");
     }
 
+    Card getCutCard() {
+        for(int i = 0; i < numCards; i++)
+            if(cards[i].isCutCard())
+                return cards[i];
+
+        return Card();
+    }
+
     void shuffle() {
 
         srand((unsigned)time(0));
@@ -110,7 +118,7 @@ class Deck {
         do {
             isMixed = false;
             for(int i = 0; i < numCards - 1; i++) {
-                if(cards[i].getSortValue() > cards[i + 1].getSortValue()) {
+                if(cards[i].getRank() > cards[i + 1].getRank()) {
                     dummy = cards[i];
                     cards[i] = cards[i + 1];
                     cards[i + 1] = dummy;
@@ -131,7 +139,7 @@ class Deck {
         do {
             isMixed = false;
             for(int i = 0; i < numCards - 1; i++) {
-                if(cards[i].getSortValue() > cards[i + 1].getSortValue()) {
+                if(cards[i].getRank() > cards[i + 1].getRank()) {
                     dummy = cards[i];
                     cards[i] = cards[i + 1];
                     cards[i + 1] = dummy;
@@ -270,12 +278,13 @@ class Deck {
         return total;
     }
 
+    protected:
     int checkNextRunPart(int index) {
         int points = 1;
         int streak = 0;
 
         for(int i = index + 1; i < numCards; i++) {
-            if(cards[i].getSortValue() == cards[index].getSortValue() + 1) {
+            if(cards[i].getRank() == cards[index].getRank() + 1) {
                 streak++;
                 points += checkNextRunPart(i);
                 if(streak > 1)
@@ -286,6 +295,7 @@ class Deck {
         return points;
     }
 
+    public:
     int scoreFlush() {
         int numClubs = 0;
         int numSpades = 0;
@@ -336,6 +346,14 @@ class Deck {
     }
 
     int scoreJacks() {
+        string cutSuit = getCutCard().getSuit();
+
+        for(int i = 0; i < numCards; i++)
+            if(!cards[i].isCutCard())
+                if(cards[i].getRank() == 11 && cards[i].getIcon() == "J")
+                    if(cards[i].getSuit() == cutSuit)
+                        return 1;
+
         return 0;
     }
 
