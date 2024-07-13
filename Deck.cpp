@@ -27,6 +27,10 @@ class Deck {
     }
 
     Deck(int num) {
+
+        for(int i = 0; i < MAX_CARDS; i++)
+            cards[i] = Card();
+
         string suits[] = { "♣", "♠", "♥", "♦" };
         string icons[] = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" };
         int cardNum = 0;
@@ -42,6 +46,17 @@ class Deck {
                     return;
             }
         }
+    }
+
+    Deck(Card crds[MAX_CARDS]) {
+        int count = 0;
+
+        while(count < MAX_CARDS && crds[count].getRank() >= 0) {
+            cards[count] = crds[count];
+            count++;
+        }
+
+        numCards = count;
     }
 
     int getNumCards() {
@@ -217,32 +232,25 @@ class Deck {
 
         for(int i = 0; i < numCards; i++) {
             for(int j = i + 1; j < numCards; j++) {
-                if(cards[i].getValue() + cards[j].getValue() == 15) {
+                if(cards[i].getValue() + cards[j].getValue() == 15)
                     points += 2;
-                }
                 else {
                     for(int k = j + 1; k < numCards; k++) {
-                        if(cards[i].getValue() + cards[j].getValue() + cards[k].getValue() == 15) {
+                        if(cards[i].getValue() + cards[j].getValue() + cards[k].getValue() == 15)
                             points += 2;
-                        }
-                        else {
-                            for(int l = k + 1; l < numCards; l++) {
-                                if(cards[i].getValue() + cards[j].getValue() + cards[k].getValue() + cards[l].getValue() == 15) {
+                        else
+                            for(int l = k + 1; l < numCards; l++)
+                                if(cards[i].getValue() + cards[j].getValue() + cards[k].getValue() + cards[l].getValue() == 15)
                                     points += 2;
-                                }
-                            }
-                        }
                     }
                 }
             }
         }
 
         //Checking for quints
-        if(numCards >= 5) {
-            if(cards[0].getValue() + cards[1].getValue() + cards[2].getValue() + cards[3].getValue() + cards[4].getValue() == 15) {
+        if(numCards >= 5)
+            if(cards[0].getValue() + cards[1].getValue() + cards[2].getValue() + cards[3].getValue() + cards[4].getValue() == 15)
                 points += 2;
-            }
-        }
 
         return points;
     }
@@ -250,13 +258,10 @@ class Deck {
     int scorePairs() {
         int points = 0;
 
-        for(int i = 0; i < numCards; i++) {
-            for(int j = i + 1; j < numCards; j++) {
-                if(cards[i].getIcon() == cards[j].getIcon()) {
+        for(int i = 0; i < numCards; i++)
+            for(int j = i + 1; j < numCards; j++)
+                if(cards[i].getIcon() == cards[j].getIcon())
                     points += 2;
-                }
-            }
-        }
 
         return points;
     }
@@ -265,11 +270,33 @@ class Deck {
         sortAll();
         int total = 0;
 
-        for(int i = 0; i <= numCards - 3; i++) {
-            int tempScore = checkNextRunPart(i);
-            if(tempScore >= 3) {
+        total += checkRun();
+
+        if(total == numCards) {
+            moveCutsToEnd();
+            return total;
+        }
+
+        for(int i = 0; i < numCards; i++) {
+            Deck tempDeck(cards);
+            tempDeck.remove(i);
+            tempDeck.sortAll();
+            int tempScore = tempDeck.checkRun();
+            if(tempScore >= 3)
                 total += tempScore;
-                break;
+        }
+
+        if(total == 0 && numCards == 5) {
+            for(int i = 0; i < numCards; i++) {
+                for(int j = i; j < numCards - 1; j++) {
+                    Deck tempDeck(cards);
+                    tempDeck.remove(i);
+                    tempDeck.remove(j);
+                    tempDeck.sortAll();
+                    int tempScore = tempDeck.checkRun();
+                    if(tempScore >= 3)
+                        total += tempScore;
+                }
             }
         }
 
@@ -279,20 +306,20 @@ class Deck {
     }
 
     protected:
-    int checkNextRunPart(int index) {
-        int points = 1;
-        int streak = 0;
+    int checkRun() {
+        bool hasRun = true;
 
-        for(int i = index + 1; i < numCards; i++) {
-            if(cards[i].getRank() == cards[index].getRank() + 1) {
-                streak++;
-                points += checkNextRunPart(i);
-                if(streak > 1)
-                    points++;
+        for(int i = 0; i < numCards - 1; i++) {
+            if(cards[i + 1].getRank() != cards[i].getRank() + 1) {
+                hasRun = false;
+                break;
             }
         }
 
-        return points;
+        if(hasRun)
+            return numCards;
+        else
+            return 0;
     }
 
     public:
@@ -355,6 +382,19 @@ class Deck {
                         return 1;
 
         return 0;
+    }
+
+    void scoreAllHandsMinusTwo() {
+        for(int i = 0; i < numCards; i++) {
+            for(int j = i; j < numCards - 1; j++) {
+                Deck tempDeck(cards);
+                tempDeck.remove(i);
+                tempDeck.remove(j);
+                tempDeck.sort();
+                cout << tempDeck.toString();
+                tempDeck.scoreAllPrint();
+            }
+        }
     }
 
     string toString() {
