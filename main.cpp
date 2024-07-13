@@ -19,6 +19,10 @@ int main(int argc, char const* argv[]) {
 
     deck.scoreAllPrint();
 
+    Deck deck1Copy = deck;
+    deck1Copy.remove(0);
+    cout << deck.toString() << "\n" << deck1Copy.toString();
+
     Deck deck2(0);
     deck2.add(Card("8", "C"));
     deck2.add(Card("7", "c"));
