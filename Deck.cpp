@@ -321,6 +321,11 @@ class Deck {
         else
             return 0;
     }
+    int factorial(int n) {
+        if(n > 0)
+            return n * factorial(n - 1);
+        return 1;
+    }
 
     public:
     int scoreFlush() {
@@ -385,16 +390,71 @@ class Deck {
     }
 
     void scoreAllHandsMinusTwo() {
+        int numHandsToScore = factorial(numCards) / (2 * factorial(numCards - 2));
+        cout << numHandsToScore << "\n";
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        int count = 0;
+
         for(int i = 0; i < numCards; i++) {
             for(int j = i; j < numCards - 1; j++) {
+                cout << count << "\n";
                 Deck tempDeck(cards);
                 tempDeck.remove(i);
                 tempDeck.remove(j);
                 tempDeck.sort();
-                cout << tempDeck.toString();
-                tempDeck.scoreAllPrint();
+                scores[count] = tempDeck.scoreAll();
+                hands[count++] = tempDeck;
             }
         }
+
+        bool isMixed = false;
+
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyInt = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyInt;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible hands ranked:\n\n";
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            // if(scores[i] > 0) {
+            if(i > 0 && scores[i] != scores[i - 1])
+                cout << "\n";
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << toStringSmall(hands[i]);
+            // }
+        }
+
+        cout << "\n";
+
+    }
+
+    string toStringSmall(Deck deck) {
+
+        string deckString = "[";
+
+        for(int i = 0; i < deck.getNumCards(); i++) {
+            deckString += deck.getCard(i).getIcon();
+            deckString += deck.getCard(i).getSuit();
+            if(i < deck.getNumCards() - 1)
+                deckString += ", ";
+        }
+
+        deckString += "]\n";
+
+        return deckString;
     }
 
     string toString() {

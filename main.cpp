@@ -5,87 +5,78 @@
 
 int main(int argc, char const* argv[]) {
 
-    // Deck deck(6);
+    Deck deck(6);
 
-    // deck.shuffle();
+    deck.shuffle();
 
-    // cout << deck.toString();
+    cout << deck.toString();
 
-    // deck.scoreAllHandsMinusTwo();
+    deck.scoreAllHandsMinusTwo();
 
-    // deck.remove(4);
-    // deck.remove(4);
-    // deck.sort();
+    // Deck deck2(0);
+    // deck2.add(Card("4", "C"));
+    // deck2.add(Card("6", "c"));
+    // deck2.add(Card("5", "c"));
+    // deck2.add(Card("J", "c"));
 
-    // cout << deck.toString();
+    // deck2.sort();
+    // cout << deck2.toString();
+    // deck2.scoreAllPrint();
 
-    // deck.scoreAllPrint();
+    // Deck deck4(0);
+    // deck4.add(Card("7", "C"));
+    // deck4.add(Card("7", "c"));
+    // deck4.add(Card("8", "c"));
+    // deck4.add(Card("9", "c"));
+    // deck4.add(Card("8", "d", true));
 
-    Deck deck2(0);
-    deck2.add(Card("8", "C"));
-    deck2.add(Card("7", "c"));
-    deck2.add(Card("8", "c"));
-    deck2.add(Card("9", "c"));
-    deck2.add(Card("8", "d", true));
+    // deck4.sort();
+    // cout << deck4.toString();
+    // deck4.scoreAllPrint();
 
-    deck2.sort();
-    cout << deck2.toString();
-    deck2.scoreAllPrint();
+    // Deck deck5(0);
+    // deck5.add(Card("7", "C"));
+    // deck5.add(Card("9", "c"));
+    // deck5.add(Card("8", "c"));
+    // deck5.add(Card("9", "c"));
+    // deck5.add(Card("8", "d", true));
 
-    Deck deck4(0);
-    deck4.add(Card("7", "C"));
-    deck4.add(Card("7", "c"));
-    deck4.add(Card("8", "c"));
-    deck4.add(Card("9", "c"));
-    deck4.add(Card("8", "d", true));
+    // deck5.sort();
+    // cout << deck5.toString();
+    // deck5.scoreAllPrint();
 
-    deck4.sort();
-    cout << deck4.toString();
-    deck4.scoreAllPrint();
+    // Deck deck6(0);
+    // deck6.add(Card("K", "C"));
+    // deck6.add(Card("9", "c"));
+    // deck6.add(Card("8", "c"));
+    // deck6.add(Card("9", "c"));
+    // deck6.add(Card("8", "d", true));
 
-    Deck deck5(0);
-    deck5.add(Card("7", "C"));
-    deck5.add(Card("9", "c"));
-    deck5.add(Card("8", "c"));
-    deck5.add(Card("9", "c"));
-    deck5.add(Card("8", "d", true));
+    // deck6.sort();
+    // cout << deck6.toString();
+    // deck6.scoreAllPrint();
 
-    deck5.sort();
-    cout << deck5.toString();
-    deck5.scoreAllPrint();
+    // Deck deck7(0);
+    // deck7.add(Card("7", "C"));
+    // deck7.add(Card("10", "c"));
+    // deck7.add(Card("8", "c"));
+    // deck7.add(Card("9", "c"));
+    // deck7.add(Card("8", "d", true));
 
-    Deck deck6(0);
-    deck6.add(Card("K", "C"));
-    deck6.add(Card("9", "c"));
-    deck6.add(Card("8", "c"));
-    deck6.add(Card("9", "c"));
-    deck6.add(Card("8", "d", true));
+    // deck7.sort();
+    // cout << deck7.toString();
+    // deck7.scoreAllPrint();
 
-    deck6.sort();
-    cout << deck6.toString();
-    deck6.scoreAllPrint();
+    // Deck deck8(0);
+    // deck8.add(Card("7", "C"));
+    // deck8.add(Card("10", "c"));
+    // deck8.add(Card("8", "c"));
+    // deck8.add(Card("9", "c"));
+    // deck8.add(Card("J", "d", true));
 
-    Deck deck7(0);
-    deck7.add(Card("7", "C"));
-    deck7.add(Card("10", "c"));
-    deck7.add(Card("8", "c"));
-    deck7.add(Card("9", "c"));
-    deck7.add(Card("8", "d", true));
-
-    deck7.sort();
-    cout << deck7.toString();
-    deck7.scoreAllPrint();
-
-    Deck deck8(0);
-    deck8.add(Card("7", "C"));
-    deck8.add(Card("10", "c"));
-    deck8.add(Card("8", "c"));
-    deck8.add(Card("9", "c"));
-    deck8.add(Card("J", "d", true));
-
-    deck8.sort();
-    cout << deck8.toString();
-    deck8.scoreAllPrint();
+    // deck8.sort();
+    // cout << deck8.toString();
+    // deck8.scoreAllPrint();
 
     // Deck deck3(0);
     // deck3.add(Card("J", "C"));
