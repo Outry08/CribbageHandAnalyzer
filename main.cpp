@@ -13,6 +13,8 @@ int main(int argc, char const* argv[]) {
 
     deck.scoreAllHandsMinusTwo();
 
+    deck.scoreAllCuts();
+
     // Deck deck2(0);
     // deck2.add(Card("4", "C"));
     // deck2.add(Card("6", "c"));

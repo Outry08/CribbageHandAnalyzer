@@ -433,26 +433,67 @@ class Deck {
             // if(scores[i] > 0) {
             if(i > 0 && scores[i] != scores[i - 1])
                 cout << "\n";
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << toStringSmall(hands[i]);
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall();
             // }
         }
 
         cout << "\n";
 
+        free(scores);
+        free(hands);
     }
 
-    string toStringSmall(Deck deck) {
+    void scoreAllCuts() {
+        for(int i = 0; i < 13; i++) {
+            for(int j = 0; j < 4; j++) {
+                Deck tempDeck = cards;
+                string suit;
+                if(j == 0)
+                    suit = "c";
+                else if(j == 1)
+                    suit = "s";
+                else if(j == 2)
+                    suit = "h";
+                else
+                    suit = "d";
+                tempDeck.add(Card(i + 1, suit, true));
+                int score = tempDeck.scoreAll();
+                cout << "Score: " << score << ": " << tempDeck.toStringSmall() << "\n";
+            }
+        }
+    }
+
+    string toStringSmall() {
 
         string deckString = "[";
 
-        for(int i = 0; i < deck.getNumCards(); i++) {
-            deckString += deck.getCard(i).getIcon();
-            deckString += deck.getCard(i).getSuit();
-            if(i < deck.getNumCards() - 1)
+        for(int i = 0; i < getNumCards(); i++) {
+            if(!cards[i].isCutCard()) {
+                deckString += cards[i].getIcon();
+                deckString += cards[i].getSuit();
                 deckString += ", ";
+            }
         }
 
-        deckString += "]\n";
+        deckString += "\b\b]  ";
+
+        bool foundCutCard = false;
+
+        for(int i = 0; i < getNumCards();i++) {
+            if(cards[i].isCutCard()) {
+                if(!foundCutCard) {
+                    deckString += "[";
+                    foundCutCard = true;
+                }
+                deckString += cards[i].getIcon();
+                deckString += cards[i].getSuit();
+                deckString += ", ";
+            }
+        }
+
+        if(foundCutCard)
+            deckString += "\b\b]";
+        deckString += "\n";
 
         return deckString;
     }

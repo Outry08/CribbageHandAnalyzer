@@ -41,8 +41,8 @@ class Card {
         rank = iconToRank(ico);
         cutCard = false;
     }
-    Card(int val, string su) {
-        rank = val;
+    Card(int rnk, string su) {
+        rank = rnk;
 
         if(su == "c" || su == "C")
             su = "♣";
@@ -54,7 +54,7 @@ class Card {
             su = "♦";
 
         suit = su;
-        icon = rankToIcon(val);
+        icon = rankToIcon(rnk);
         value = iconToValue(icon);
         cutCard = false;
     }
@@ -74,8 +74,8 @@ class Card {
         rank = iconToRank(ico);
         cutCard = cut;
     }
-    Card(int val, string su, bool cut) {
-        rank = val;
+    Card(int rnk, string su, bool cut) {
+        rank = rnk;
 
         if(su == "c" || su == "C")
             su = "♣";
@@ -87,7 +87,7 @@ class Card {
             su = "♦";
 
         suit = su;
-        icon = rankToIcon(val);
+        icon = rankToIcon(rnk);
         value = iconToValue(icon);
         cutCard = cut;
     }
