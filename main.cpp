@@ -9,29 +9,35 @@ int main(int argc, char const* argv[]) {
 
     deck.shuffle();
 
-    cout << deck.toString();
+    cout << deck.toStringln();
 
     Deck* allHands = deck.scoreAllHandsMinusTwo();
     int numPossibleHands = deck.numPossibleHands();
 
-    for(int i = 0; i < numPossibleHands; i++) {
-        allHands[i].scoreAllPrint();
-    }
+    // for(int i = 0; i < numPossibleHands; i++) {
+    //     allHands[i].scoreAllPrint();
+    // }
+    int handChoice;
 
-    // cout << "Which hand would you like to proceed with? (1-" << numPossibleHands << "): ";
+    do {
+        do {
+            cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
+            cin >> handChoice;
+            if(handChoice < 0 || handChoice > numPossibleHands)
+                cout << "Please input a number between 0-" << numPossibleHands << ": ";
+        } while(handChoice < 0 || handChoice > numPossibleHands);
 
-    // int handChoice;
-    // cin >> handChoice;
+        if(handChoice > 0)
+            allHands[handChoice - 1].scoreAllCuts(deck);
+    } while(handChoice > 0 && handChoice <= numPossibleHands);
 
-    // allHands[--handChoice].scoreAllCuts();
+    // Deck deck2(0);
+    // deck2.add(Card("10", "C"));
+    // deck2.add(Card("10", "s"));
+    // deck2.add(Card("J", "c"));
+    // deck2.add(Card("Q", "c"));
 
-    Deck deck2(0);
-    deck2.add(Card("10", "C"));
-    deck2.add(Card("10", "s"));
-    deck2.add(Card("J", "c"));
-    deck2.add(Card("Q", "c"));
-
-    deck2.scoreAllPrint();
+    // deck2.scoreAllPrint();
 
     // Deck deck4(0);
     // deck4.add(Card("7", "C"));

@@ -48,15 +48,15 @@ class Deck {
         }
     }
 
-    Deck(Card crds[MAX_CARDS]) {
+    Deck(Card crds[MAX_CARDS], int num) {
         int count = 0;
 
-        while(count < MAX_CARDS && crds[count].getRank() >= 0) {
+        while(count < num && crds[count].getRank() >= 0) {
             cards[count] = crds[count];
             count++;
         }
 
-        numCards = count;
+        numCards = num;
     }
 
     int getNumCards() {
@@ -110,11 +110,14 @@ class Deck {
     }
 
     void remove(int index) {
-        if(cards[index].getValue() != -1) {
-            for(int i = index; i < numCards - 1; i++) {
-                cards[i] = cards[i + 1];
+        // cout << getNumCards() << "\n";
+        if(index >= 0 && index <= getNumCards()) {
+            if(cards[index].getValue() != -1) {
+                for(int i = index; i < getNumCards() - 1; i++) {
+                    cards[i] = cards[i + 1];
+                }
+                numCards--;
             }
-            numCards--;
         }
     }
 
@@ -201,7 +204,7 @@ class Deck {
     int scoreAllPrint() {
         int points = 0;
 
-        cout << toString();
+        cout << toStringln();
 
         int temp = scoreFifteens();
         if(temp > 0)
@@ -284,7 +287,7 @@ class Deck {
         }
 
         for(int i = 0; i < numCards; i++) {
-            Deck tempDeck(cards);
+            Deck tempDeck(cards, getNumCards());
             tempDeck.remove(i);
             tempDeck.sortAll();
             int tempScore = tempDeck.checkRun();
@@ -295,7 +298,7 @@ class Deck {
         if(total == 0 && numCards == 5) {
             for(int i = 0; i < numCards; i++) {
                 for(int j = i; j < numCards - 1; j++) {
-                    Deck tempDeck(cards);
+                    Deck tempDeck(cards, getNumCards());
                     tempDeck.remove(i);
                     tempDeck.remove(j);
                     tempDeck.sortAll();
@@ -315,15 +318,21 @@ class Deck {
     int checkRun() {
         bool hasRun = true;
 
+        // cout << "\n" << toStringSmall();
+
         for(int i = 0; i < numCards - 1; i++) {
+            // cout << "Current: " << cards[i].getRank() << " | Next: " << cards[i + 1].getRank() << "\n";
             if(cards[i + 1].getRank() != cards[i].getRank() + 1) {
+                // cout << "OOF: Current: " << cards[i].getRank() << " | Next: " << cards[i + 1].getRank() << "\n";
                 hasRun = false;
                 break;
             }
         }
 
-        if(hasRun)
+        if(hasRun) {
+            // cout << "+" << numCards << "\n";
             return numCards;
+        }
         else
             return 0;
     }
@@ -416,8 +425,8 @@ class Deck {
 
         for(int i = 0; i < numCards; i++) {
             for(int j = i; j < numCards - 1; j++) {
-                cout << count << "\n";
-                Deck tempDeck(cards);
+                // cout << count << "\n";
+                Deck tempDeck(cards, getNumCards());
                 tempDeck.remove(i);
                 tempDeck.remove(j);
                 tempDeck.sort();
@@ -431,9 +440,9 @@ class Deck {
             isMixed = false;
             for(int i = 0; i < numHandsToScore - 1; i++) {
                 if(scores[i] < scores[i + 1]) {
-                    int dummyInt = scores[i];
+                    int dummyScore = scores[i];
                     scores[i] = scores[i + 1];
-                    scores[i + 1] = dummyInt;
+                    scores[i + 1] = dummyScore;
 
                     Deck dummyHand = hands[i];
                     hands[i] = hands[i + 1];
@@ -450,7 +459,7 @@ class Deck {
             // if(scores[i] > 0) {
             if(i > 0 && scores[i] != scores[i - 1])
                 cout << "\n";
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall();
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmallln();
             // }
         }
 
@@ -472,8 +481,6 @@ class Deck {
 
         if(scoreFlush() >= 0)
             flushSuit = getCard(0).getSuit();
-
-
 
         for(int i = 0; i < 13; i++) {
             hasAll4 = 0;
@@ -516,9 +523,9 @@ class Deck {
             isMixed = false;
             for(int i = 0; i < numHandsToScore - 1; i++) {
                 if(scores[i] < scores[i + 1]) {
-                    int dummyInt = scores[i];
+                    int dummyScore = scores[i];
                     scores[i] = scores[i + 1];
-                    scores[i + 1] = dummyInt;
+                    scores[i + 1] = dummyScore;
 
                     Deck dummyHand = hands[i];
                     hands[i] = hands[i + 1];
@@ -534,10 +541,110 @@ class Deck {
         for(int i = 0; i < numHandsToScore; i++) {
             if(i > 0 && scores[i] != scores[i - 1])
                 cout << "\n";
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall();
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmallln();
         }
 
         cout << "\n";
+
+        free(scores);
+        free(hands);
+    }
+
+    void scoreAllCuts(Deck originalDeck) {
+        int numHandsToScore = 13;
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        float* odds = (float*)malloc(sizeof(float) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        int count = 0;
+        int hasAll4 = 0;
+        string availSuit;
+        string jackSuit = findJackSuit();
+        string flushSuit = "null";
+
+        if(scoreFlush() >= 0)
+            flushSuit = getCard(0).getSuit();
+
+        for(int i = 0; i < 13; i++) {
+            hasAll4 = 0;
+            Deck tempDeck = *this;
+            for(int j = 0; j < 4; j++) {
+                string suit;
+                if(j == 0)
+                    suit = "c";
+                else if(j == 1)
+                    suit = "s";
+                else if(j == 2)
+                    suit = "h";
+                else
+                    suit = "d";
+
+                Card tempCard = Card(i + 1, suit, true);
+
+                if(tempDeck.contains(tempCard))
+                    hasAll4++;
+                else {
+                    availSuit = tempCard.getSuit();
+                    if(flushSuit == tempCard.getSuit() || jackSuit == tempCard.getSuit())
+                        break;
+                }
+            }
+
+            if(hasAll4 < 4) {
+                tempDeck.add(Card(i + 1, availSuit, true));
+                int score = tempDeck.scoreAll();
+
+                int numOfCurrCard = 0;
+                float chance;
+                for(int j = 0; j < originalDeck.getNumCards(); j++) {
+                    if(originalDeck.getCard(j).getRank() == i + 1)
+                        numOfCurrCard++;
+                }
+                chance = (float)(4 - numOfCurrCard) / (float)(MAX_CARDS - originalDeck.getNumCards());
+
+                scores[count] = score;
+                odds[count] = round(chance * 10000) / 100;
+                hands[count++] = tempDeck;
+            }
+            else
+                numHandsToScore--;
+        }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyScore = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyScore;
+
+                    float dummyOdd = odds[i];
+                    odds[i] = odds[i + 1];
+                    odds[i + 1] = dummyOdd;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible cuts ranked:\n\n";
+
+        float runningOdds = 0;
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scores[i] != scores[i - 1]) {
+                cout << "(" << runningOdds << "% total)\n\n";
+                runningOdds = 0;
+            }
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " - (" << odds[i] << "%)\n";
+            runningOdds += odds[i];
+        }
+
+        cout << "(" << runningOdds << "% total)\n\n";
 
         free(scores);
         free(hands);
@@ -573,9 +680,12 @@ class Deck {
 
         if(foundCutCard)
             deckString += "\b\b]";
-        deckString += "\n";
 
         return deckString;
+    }
+
+    string toStringSmallln() {
+        return toStringSmall() + "\n";
     }
 
     string toString() {
@@ -709,9 +819,11 @@ class Deck {
                 cardsString += "   ";
         }
 
-        cardsString += "\n";
-
         return cardsString;
+    }
+
+    string toStringln() {
+        return toString() + "\n";
     }
 
 };
