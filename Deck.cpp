@@ -125,8 +125,15 @@ class Deck {
         moveCutsToEnd();
     }
 
-    void sort() {
+    bool contains(Card card) {
+        for(int i = 0; i < getNumCards(); i++)
+            if(getCard(i).equals(card))
+                return true;
 
+        return false;
+    }
+
+    void sort() {
         bool isMixed;
         Card dummy;
 
@@ -143,11 +150,9 @@ class Deck {
         } while(isMixed);
 
         moveCutsToEnd();
-
     }
 
     void sortAll() {
-
         bool isMixed;
         Card dummy;
 
@@ -162,7 +167,6 @@ class Deck {
                 }
             }
         } while(isMixed);
-
     }
 
     void moveCutsToEnd() {
@@ -196,6 +200,8 @@ class Deck {
 
     int scoreAllPrint() {
         int points = 0;
+
+        cout << toString();
 
         int temp = scoreFifteens();
         if(temp > 0)
@@ -327,6 +333,14 @@ class Deck {
         return 1;
     }
 
+    string findJackSuit() {
+        for(int i = 0; i < getNumCards(); i++)
+            if(getCard(i).getIcon() == "J")
+                return getCard(i).getSuit();
+
+        return "null";
+    }
+
     public:
     int scoreFlush() {
         int numClubs = 0;
@@ -389,9 +403,13 @@ class Deck {
         return 0;
     }
 
-    void scoreAllHandsMinusTwo() {
-        int numHandsToScore = factorial(numCards) / (2 * factorial(numCards - 2));
-        cout << numHandsToScore << "\n";
+    int numPossibleHands() {
+        return factorial(getNumCards()) / (2 * factorial(getNumCards() - 2));
+    }
+
+    Deck* scoreAllHandsMinusTwo() {
+        int numHandsToScore = numPossibleHands();
+
         int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
         Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
         int count = 0;
@@ -409,7 +427,6 @@ class Deck {
         }
 
         bool isMixed = false;
-
         do {
             isMixed = false;
             for(int i = 0; i < numHandsToScore - 1; i++) {
@@ -440,13 +457,29 @@ class Deck {
         cout << "\n";
 
         free(scores);
-        free(hands);
+        return hands;
     }
 
     void scoreAllCuts() {
+        int numHandsToScore = 13;
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        int count = 0;
+        int hasAll4 = 0;
+        string availSuit;
+        string jackSuit = findJackSuit();
+        string flushSuit = "null";
+
+        if(scoreFlush() >= 0)
+            flushSuit = getCard(0).getSuit();
+
+
+
         for(int i = 0; i < 13; i++) {
+            hasAll4 = 0;
+            Deck tempDeck = *this;
             for(int j = 0; j < 4; j++) {
-                Deck tempDeck = cards;
+
                 string suit;
                 if(j == 0)
                     suit = "c";
@@ -456,11 +489,58 @@ class Deck {
                     suit = "h";
                 else
                     suit = "d";
-                tempDeck.add(Card(i + 1, suit, true));
-                int score = tempDeck.scoreAll();
-                cout << "Score: " << score << ": " << tempDeck.toStringSmall() << "\n";
+
+                Card tempCard = Card(i + 1, suit, true);
+
+                if(tempDeck.contains(tempCard))
+                    hasAll4++;
+                else {
+                    availSuit = tempCard.getSuit();
+                    if(flushSuit == tempCard.getSuit() || jackSuit == tempCard.getSuit())
+                        break;
+                }
+
             }
+            if(hasAll4 < 4) {
+                tempDeck.add(Card(i + 1, availSuit, true));
+                int score = tempDeck.scoreAll();
+                scores[count] = score;
+                hands[count++] = tempDeck;
+            }
+            else
+                numHandsToScore--;
         }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyInt = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyInt;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible cuts ranked:\n\n";
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scores[i] != scores[i - 1])
+                cout << "\n";
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall();
+        }
+
+        cout << "\n";
+
+        free(scores);
+        free(hands);
     }
 
     string toStringSmall() {
@@ -479,7 +559,7 @@ class Deck {
 
         bool foundCutCard = false;
 
-        for(int i = 0; i < getNumCards();i++) {
+        for(int i = 0; i < getNumCards(); i++) {
             if(cards[i].isCutCard()) {
                 if(!foundCutCard) {
                     deckString += "[";
@@ -499,7 +579,6 @@ class Deck {
     }
 
     string toString() {
-
         string cardsString = "";
 
         for(int h = 0; h < numCards / 10; h++) {

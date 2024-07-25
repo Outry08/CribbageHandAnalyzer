@@ -11,19 +11,27 @@ int main(int argc, char const* argv[]) {
 
     cout << deck.toString();
 
-    deck.scoreAllHandsMinusTwo();
+    Deck* allHands = deck.scoreAllHandsMinusTwo();
+    int numPossibleHands = deck.numPossibleHands();
 
-    deck.scoreAllCuts();
+    for(int i = 0; i < numPossibleHands; i++) {
+        allHands[i].scoreAllPrint();
+    }
 
-    // Deck deck2(0);
-    // deck2.add(Card("4", "C"));
-    // deck2.add(Card("6", "c"));
-    // deck2.add(Card("5", "c"));
-    // deck2.add(Card("J", "c"));
+    // cout << "Which hand would you like to proceed with? (1-" << numPossibleHands << "): ";
 
-    // deck2.sort();
-    // cout << deck2.toString();
-    // deck2.scoreAllPrint();
+    // int handChoice;
+    // cin >> handChoice;
+
+    // allHands[--handChoice].scoreAllCuts();
+
+    Deck deck2(0);
+    deck2.add(Card("10", "C"));
+    deck2.add(Card("10", "s"));
+    deck2.add(Card("J", "c"));
+    deck2.add(Card("Q", "c"));
+
+    deck2.scoreAllPrint();
 
     // Deck deck4(0);
     // deck4.add(Card("7", "C"));

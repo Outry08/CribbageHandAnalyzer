@@ -185,7 +185,11 @@ class Card {
             return to_string(rank);
     }
 
-    std::string toString() {
+    bool equals(Card card) {
+        return getSuit() == card.getSuit() && getIcon() == card.getIcon() && getRank() == card.getRank();
+    }
+
+    string toString() {
 
         char extraSpace = ' ';
 
