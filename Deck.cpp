@@ -136,6 +136,14 @@ class Deck {
         return false;
     }
 
+    bool contains(int rank) {
+        for(int i = 0; i < getNumCards(); i++)
+            if(getCard(i).getRank() == rank)
+                return true;
+
+        return false;
+    }
+
     void sort() {
         bool isMixed;
         Card dummy;
@@ -187,6 +195,16 @@ class Deck {
                 }
             }
         } while(isMixed);
+    }
+
+    int cardSum() {
+        int sum = 0;
+
+        for(int i = 0; i < getNumCards(); i++) {
+            sum += getCard(i).getValue();
+        }
+
+        return sum;
     }
 
     int scoreAll() {
@@ -276,6 +294,10 @@ class Deck {
     }
 
     int scoreRuns() {
+
+        if(getNumCards() < 3)
+            return 0;
+
         sortAll();
         int total = 0;
 
@@ -352,6 +374,10 @@ class Deck {
 
     public:
     int scoreFlush() {
+
+        if(getNumCards() < 4)
+            return 0;
+
         int numClubs = 0;
         int numSpades = 0;
         int numHearts = 0;
@@ -469,6 +495,63 @@ class Deck {
         return hands;
     }
 
+    Deck* scoreAllHandsMinusTwoCribRisk() {
+        int numHandsToScore = numPossibleHands();
+
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        Deck* giveaways = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        int count = 0;
+
+        for(int i = 0; i < numCards; i++) {
+            for(int j = i; j < numCards - 1; j++) {
+                Deck tempDeck(cards, getNumCards());
+                Deck giveaway(0);
+                giveaway.add(tempDeck.getCard(i));
+                giveaway.add(tempDeck.getCard(j + 1));
+                tempDeck.remove(i);
+                tempDeck.remove(j);
+                tempDeck.sort();
+                scores[count] = tempDeck.scoreAll();
+                hands[count] = tempDeck;
+                giveaways[count++] = giveaway;
+            }
+        }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyScore = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyScore;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible hands ranked:\n\n";
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scores[i] != scores[i - 1])
+                cout << "\n";
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << "Risk Score: " << scorePairDanger(giveaways[i]) << "       WORD DESCRIPTION HERE (I.E. \"High Risk\")\n";
+        }
+
+        cout << "\n";
+
+        free(scores);
+        free(giveaways);
+
+        return hands;
+    }
+
     void scoreAllCuts() {
         int numHandsToScore = 13;
         int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
@@ -548,6 +631,41 @@ class Deck {
 
         free(scores);
         free(hands);
+    }
+
+    int scorePairDanger(Deck cardPair) {
+        if(cardPair.getNumCards() != 2)
+            return 0;
+
+        int riskScore = 0;
+
+        for(int i = 0; i < cardPair.getNumCards(); i++) {
+            Card currCard = cardPair.getCard(i);
+
+            if(currCard.getValue() > 0 && currCard.getValue() < 7 || currCard.getValue() == 9)
+                riskScore += 1;
+            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10)
+                riskScore += 2;
+        }
+
+        if(abs(cardPair.getCard(0).getRank() - cardPair.getCard(1).getRank()) < 2) {
+            riskScore += 1;
+            if((cardPair.contains(2) && cardPair.contains(3)) || cardPair.contains(10) || cardPair.contains(11) || cardPair.contains(12) || cardPair.contains(13))
+                riskScore += 2;
+            else if(cardPair.contains(7) && cardPair.contains(8))
+                riskScore += 5;
+            else if(cardPair.contains(7) || cardPair.contains(8))
+                riskScore += 3;
+        }
+
+        if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
+            riskScore += 2;
+        if(cardPair.cardSum() == 7 || cardPair.cardSum() == 8)
+            riskScore += 1;
+
+        riskScore += cardPair.scoreAll();
+
+        return riskScore;
     }
 
     void scoreAllCuts(Deck originalDeck) {

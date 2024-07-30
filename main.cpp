@@ -11,7 +11,7 @@ int main(int argc, char const* argv[]) {
 
     cout << deck.toStringln();
 
-    Deck* allHands = deck.scoreAllHandsMinusTwo();
+    Deck* allHands = deck.scoreAllHandsMinusTwoCribRisk();
     int numPossibleHands = deck.numPossibleHands();
 
     // for(int i = 0; i < numPossibleHands; i++) {
