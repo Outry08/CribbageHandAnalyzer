@@ -11,7 +11,7 @@ int main(int argc, char const* argv[]) {
 
     cout << deck.toStringln();
 
-    Deck* allHands = deck.scoreAllHandsMinusTwoCribRisk();
+
     int numPossibleHands = deck.numPossibleHands();
 
     // for(int i = 0; i < numPossibleHands; i++) {
@@ -20,6 +20,7 @@ int main(int argc, char const* argv[]) {
     int handChoice;
 
     do {
+        Deck* allHands = deck.scoreAllHandsMinusTwoDiscardBenefit();
         do {
             cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
             cin >> handChoice;

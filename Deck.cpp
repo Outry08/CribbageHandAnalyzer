@@ -495,7 +495,7 @@ class Deck {
         return hands;
     }
 
-    Deck* scoreAllHandsMinusTwoCribRisk() {
+    Deck* scoreAllHandsMinusTwoDiscardRisk() {
         int numHandsToScore = numPossibleHands();
 
         int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
@@ -527,6 +527,10 @@ class Deck {
                     scores[i] = scores[i + 1];
                     scores[i + 1] = dummyScore;
 
+                    Deck dummyDiscard = giveaways[i];
+                    giveaways[i] = giveaways[i + 1];
+                    giveaways[i + 1] = dummyDiscard;
+
                     Deck dummyHand = hands[i];
                     hands[i] = hands[i + 1];
                     hands[i + 1] = dummyHand;
@@ -541,7 +545,90 @@ class Deck {
         for(int i = 0; i < numHandsToScore; i++) {
             if(i > 0 && scores[i] != scores[i - 1])
                 cout << "\n";
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << "Risk Score: " << scorePairDanger(giveaways[i]) << "       WORD DESCRIPTION HERE (I.E. \"High Risk\")\n";
+
+            int pairDanger = scorePairDanger(giveaways[i]);
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Risk Score: " << pairDanger;
+
+            if(pairDanger == 0)
+                cout << " - NO RISK\n";
+            else if(pairDanger <= 3)
+                cout << " - LOW RISK\n";
+            else if(pairDanger >= 7)
+                cout << " - HIGH RISK\n";
+            else
+                cout << " - MODERATE RISK\n";
+        }
+
+        cout << "\n";
+
+        free(scores);
+        free(giveaways);
+
+        return hands;
+    }
+
+    Deck* scoreAllHandsMinusTwoDiscardBenefit() {
+        int numHandsToScore = numPossibleHands();
+
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        Deck* giveaways = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        int count = 0;
+
+        for(int i = 0; i < numCards; i++) {
+            for(int j = i; j < numCards - 1; j++) {
+                Deck tempDeck(cards, getNumCards());
+                Deck giveaway(0);
+                giveaway.add(tempDeck.getCard(i));
+                giveaway.add(tempDeck.getCard(j + 1));
+                tempDeck.remove(i);
+                tempDeck.remove(j);
+                tempDeck.sort();
+                scores[count] = tempDeck.scoreAll();
+                hands[count] = tempDeck;
+                giveaways[count++] = giveaway;
+            }
+        }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyScore = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyScore;
+
+                    Deck dummyDiscard = giveaways[i];
+                    giveaways[i] = giveaways[i + 1];
+                    giveaways[i + 1] = dummyDiscard;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible hands ranked:\n\n";
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scores[i] != scores[i - 1])
+                cout << "\n";
+
+            int pairBenefit = scorePairBenefit(giveaways[i]);
+            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Benefit Score: " << pairBenefit;
+
+            if(pairBenefit == 0)
+                cout << " - NO REWARD\n";
+            else if(pairBenefit <= 3)
+                cout << " - LOW REWARD\n";
+            else if(pairBenefit >= 7)
+                cout << " - HIGH REWARD\n";
+            else
+                cout << " - MODERATE REWARD\n";
         }
 
         cout << "\n";
@@ -641,26 +728,85 @@ class Deck {
 
         for(int i = 0; i < cardPair.getNumCards(); i++) {
             Card currCard = cardPair.getCard(i);
-
-            if(currCard.getValue() > 0 && currCard.getValue() < 7 || currCard.getValue() == 9)
+            if(currCard.getValue() == 6 || currCard.getValue() == 9) {
                 riskScore += 1;
-            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10)
+            }
+            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10) {
                 riskScore += 2;
+            }
         }
 
-        if(abs(cardPair.getCard(0).getRank() - cardPair.getCard(1).getRank()) < 2) {
+        if(abs(cardPair.getCard(0).getRank() - cardPair.getCard(1).getRank()) == 1) {
             riskScore += 1;
             if((cardPair.contains(2) && cardPair.contains(3)) || cardPair.contains(10) || cardPair.contains(11) || cardPair.contains(12) || cardPair.contains(13))
-                riskScore += 2;
+                riskScore += 1;
             else if(cardPair.contains(7) && cardPair.contains(8))
                 riskScore += 5;
             else if(cardPair.contains(7) || cardPair.contains(8))
                 riskScore += 3;
         }
+        else
+            if(cardPair.getCard(0).getRank() == 6 || cardPair.getCard(0).getRank() == 7 || cardPair.getCard(0).getRank() == 8 || cardPair.getCard(0).getRank() == 9)
+                if(cardPair.getCard(1).getRank() == 6 || cardPair.getCard(1).getRank() == 7 || cardPair.getCard(1).getRank() == 8 || cardPair.getCard(1).getRank() == 9)
+                    riskScore += 2;
 
-        if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
+        if(cardPair.getCard(0).getRank() == cardPair.getCard(1).getRank())
+            riskScore += 3;
+        else if(cardPair.getCard(0).getValue() == cardPair.getCard(1).getValue())
             riskScore += 2;
-        if(cardPair.cardSum() == 7 || cardPair.cardSum() == 8)
+
+        if(cardPair.cardSum() == 15)
+            riskScore += 3;
+        else if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
+            riskScore += 2;
+        else if(cardPair.cardSum() == 7 || cardPair.cardSum() == 8)
+            riskScore += 1;
+
+        riskScore += cardPair.scoreAll();
+
+        return riskScore;
+    }
+
+    int scorePairBenefit(Deck cardPair) {
+        if(cardPair.getNumCards() != 2)
+            return 0;
+
+        int riskScore = 0;
+
+        for(int i = 0; i < cardPair.getNumCards(); i++) {
+            Card currCard = cardPair.getCard(i);
+            if(currCard.getValue() == 6 || currCard.getValue() == 9) {
+                riskScore += 1;
+            }
+            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10) {
+                riskScore += 2;
+            }
+        }
+
+        if(abs(cardPair.getCard(0).getRank() - cardPair.getCard(1).getRank()) == 1) {
+            riskScore += 1;
+            if((cardPair.contains(2) && cardPair.contains(3)) || cardPair.contains(10) || cardPair.contains(11) || cardPair.contains(12) || cardPair.contains(13))
+                riskScore += 1;
+            else if(cardPair.contains(7) && cardPair.contains(8))
+                riskScore += 5;
+            else if(cardPair.contains(7) || cardPair.contains(8))
+                riskScore += 3;
+        }
+        else
+            if(cardPair.getCard(0).getRank() == 6 || cardPair.getCard(0).getRank() == 7 || cardPair.getCard(0).getRank() == 8 || cardPair.getCard(0).getRank() == 9)
+                if(cardPair.getCard(1).getRank() == 6 || cardPair.getCard(1).getRank() == 7 || cardPair.getCard(1).getRank() == 8 || cardPair.getCard(1).getRank() == 9)
+                    riskScore += 2;
+
+        if(cardPair.getCard(0).getRank() == cardPair.getCard(1).getRank())
+            riskScore += 3;
+        else if(cardPair.getCard(0).getValue() == cardPair.getCard(1).getValue())
+            riskScore += 2;
+
+        if(cardPair.cardSum() == 15)
+            riskScore += 3;
+        else if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
+            riskScore += 2;
+        else if(cardPair.cardSum() == 7 || cardPair.cardSum() == 8)
             riskScore += 1;
 
         riskScore += cardPair.scoreAll();
@@ -702,14 +848,14 @@ class Deck {
                     hasAll4++;
                 else {
                     availSuit = tempCard.getSuit();
-                    if(flushSuit == tempCard.getSuit() || jackSuit == tempCard.getSuit())
+                    if(flushSuit == tempCard.getSuit())
                         break;
                 }
             }
 
             if(hasAll4 < 4) {
                 tempDeck.add(Card(i + 1, availSuit, true));
-                int score = tempDeck.scoreAll();
+                int score = tempDeck.scoreAll() - tempDeck.scoreJacks();
 
                 int numOfCurrCard = 0;
                 float chance;
@@ -780,14 +926,14 @@ class Deck {
             }
         }
 
-        deckString += "\b\b]  ";
+        deckString += "\b\b]";
 
         bool foundCutCard = false;
 
         for(int i = 0; i < getNumCards(); i++) {
             if(cards[i].isCutCard()) {
                 if(!foundCutCard) {
-                    deckString += "[";
+                    deckString += "  [";
                     foundCutCard = true;
                 }
                 deckString += cards[i].getIcon();
