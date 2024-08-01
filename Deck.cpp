@@ -771,47 +771,39 @@ class Deck {
         if(cardPair.getNumCards() != 2)
             return 0;
 
-        int riskScore = 0;
+        int rewardScore = 0;
 
         for(int i = 0; i < cardPair.getNumCards(); i++) {
             Card currCard = cardPair.getCard(i);
-            if(currCard.getValue() == 6 || currCard.getValue() == 9) {
-                riskScore += 1;
-            }
-            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10) {
-                riskScore += 2;
-            }
+            if(currCard.getValue() == 6 || currCard.getValue() == 9)
+                rewardScore += 1;
+            else if(currCard.getValue() == 5 || currCard.getValue() == 7 || currCard.getValue() == 8 || currCard.getValue() == 10)
+                rewardScore += 2;
         }
 
         if(abs(cardPair.getCard(0).getRank() - cardPair.getCard(1).getRank()) == 1) {
-            riskScore += 1;
+            rewardScore += 1;
             if((cardPair.contains(2) && cardPair.contains(3)) || cardPair.contains(10) || cardPair.contains(11) || cardPair.contains(12) || cardPair.contains(13))
-                riskScore += 1;
+                rewardScore += 1;
             else if(cardPair.contains(7) && cardPair.contains(8))
-                riskScore += 5;
+                rewardScore += 4;
             else if(cardPair.contains(7) || cardPair.contains(8))
-                riskScore += 3;
+                rewardScore += 3;
         }
-        else
-            if(cardPair.getCard(0).getRank() == 6 || cardPair.getCard(0).getRank() == 7 || cardPair.getCard(0).getRank() == 8 || cardPair.getCard(0).getRank() == 9)
-                if(cardPair.getCard(1).getRank() == 6 || cardPair.getCard(1).getRank() == 7 || cardPair.getCard(1).getRank() == 8 || cardPair.getCard(1).getRank() == 9)
-                    riskScore += 2;
 
         if(cardPair.getCard(0).getRank() == cardPair.getCard(1).getRank())
-            riskScore += 3;
+            rewardScore += 3;
         else if(cardPair.getCard(0).getValue() == cardPair.getCard(1).getValue())
-            riskScore += 2;
+            rewardScore += 2;
 
         if(cardPair.cardSum() == 15)
-            riskScore += 3;
+            rewardScore += 3;
         else if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
-            riskScore += 2;
-        else if(cardPair.cardSum() == 7 || cardPair.cardSum() == 8)
-            riskScore += 1;
+            rewardScore += 1;
 
-        riskScore += cardPair.scoreAll();
+        rewardScore += cardPair.scoreAll() * 2;
 
-        return riskScore;
+        return rewardScore;
     }
 
     void scoreAllCuts(Deck originalDeck) {
