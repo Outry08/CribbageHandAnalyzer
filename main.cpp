@@ -20,7 +20,8 @@ int main(int argc, char const* argv[]) {
     int handChoice;
 
     do {
-        Deck* allHands = deck.scoreAllHandsMinusTwoDiscardBenefit();
+        deck.scoreAllHandsMinusTwoDiscardRisk();
+        Deck* allHands = deck.rankAllPossibilities(false);
         do {
             cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
             cin >> handChoice;

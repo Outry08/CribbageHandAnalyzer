@@ -811,6 +811,7 @@ class Deck {
         int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
         float* odds = (float*)malloc(sizeof(float) * numHandsToScore);
         Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+
         int count = 0;
         int hasAll4 = 0;
         string availSuit;
@@ -904,8 +905,189 @@ class Deck {
 
         free(scores);
         free(hands);
+        free(odds);
     }
 
+    Deck* rankAllPossibilities(bool myCrib) {
+        int numHandsToScore = numPossibleHands();
+
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        float* scoreOverall = (float*)malloc(sizeof(float) * numHandsToScore);
+        int count = 0;
+
+        for(int i = 0; i < numCards; i++) {
+            for(int j = i; j < numCards - 1; j++) {
+                Deck tempDeck(cards, getNumCards());
+                Deck giveaway(0);
+
+                giveaway.add(tempDeck.getCard(i));
+                giveaway.add(tempDeck.getCard(j + 1));
+
+                tempDeck.remove(i);
+                tempDeck.remove(j);
+                tempDeck.sort();
+
+                cout << tempDeck.toStringSmallln();
+
+                scoreOverall[count] = (float)(((float)tempDeck.scoreAll() / 2.0) + tempDeck.weighAllCuts());
+                cout << "  Base score: " << (tempDeck.scoreAll() / 2.0) << "\n";
+                cout << "+ Weighted Cut Evalutation: " << tempDeck.weighAllCuts() << "\n";
+                if(!myCrib) {
+                    scoreOverall[count] -= ((float)scorePairDanger(giveaway) / 2.0);
+                    cout << "- Discard Danger: " << ((float)scorePairDanger(giveaway) / 2.0);
+                }
+                else {
+                    scoreOverall[count] += ((float)scorePairBenefit(giveaway) / 2.0);
+                    cout << "+ Discard Benefit: " << ((float)scorePairBenefit(giveaway) / 2.0);
+                }
+                if(tempDeck.contains(11)) {
+                    scoreOverall[count] += 0.1;
+                }
+                hands[count++] = tempDeck;
+                cout << "\n\n";
+
+            }
+        }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scoreOverall[i] < scoreOverall[i + 1]) {
+                    float dummyScore = scoreOverall[i];
+                    scoreOverall[i] = scoreOverall[i + 1];
+                    scoreOverall[i + 1] = dummyScore;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        cout << "All possible hands ranked:\n\n";
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scoreOverall[i] != scoreOverall[i - 1])
+                cout << "\n";
+            cout.precision(3);
+            cout << fixed << "#" << (i + 1) << ": " << (i < 9 ? " " : "") << scoreOverall[i] << "pts - " << hands[i].toStringSmallln();
+        }
+
+        cout << "\n";
+
+        return hands;
+    }
+
+    protected:
+    float weighAllCuts() {
+
+        int preScore = scoreAll();
+        float weightedTotal = 0;
+
+        int numHandsToScore = 13;
+        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
+        float* odds = (float*)malloc(sizeof(float) * numHandsToScore);
+        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+
+        int count = 0;
+        int hasAll4 = 0;
+        string availSuit;
+        string jackSuit = findJackSuit();
+        string flushSuit = "null";
+
+        if(scoreFlush() >= 0)
+            flushSuit = getCard(0).getSuit();
+
+        for(int i = 0; i < 13; i++) {
+            hasAll4 = 0;
+            Deck tempDeck = *this;
+            for(int j = 0; j < 4; j++) {
+                string suit;
+                if(j == 0)
+                    suit = "c";
+                else if(j == 1)
+                    suit = "s";
+                else if(j == 2)
+                    suit = "h";
+                else
+                    suit = "d";
+
+                Card tempCard = Card(i + 1, suit, true);
+
+                if(tempDeck.contains(tempCard))
+                    hasAll4++;
+                else {
+                    availSuit = tempCard.getSuit();
+                    if(flushSuit == tempCard.getSuit())
+                        break;
+                }
+            }
+
+            if(hasAll4 < 4) {
+                tempDeck.add(Card(i + 1, availSuit, true));
+                int score = tempDeck.scoreAll() - tempDeck.scoreJacks();
+
+                int numOfCurrCard = 0;
+                float chance;
+                for(int j = 0; j < getNumCards(); j++) {
+                    if(getCard(j).getRank() == i + 1)
+                        numOfCurrCard++;
+                }
+                chance = (float)(4 - numOfCurrCard) / (float)(MAX_CARDS - getNumCards());
+
+                scores[count] = score;
+                odds[count] = chance;
+                hands[count++] = tempDeck;
+            }
+            else
+                numHandsToScore--;
+        }
+
+        bool isMixed = false;
+        do {
+            isMixed = false;
+            for(int i = 0; i < numHandsToScore - 1; i++) {
+                if(scores[i] < scores[i + 1]) {
+                    int dummyScore = scores[i];
+                    scores[i] = scores[i + 1];
+                    scores[i + 1] = dummyScore;
+
+                    float dummyOdd = odds[i];
+                    odds[i] = odds[i + 1];
+                    odds[i + 1] = dummyOdd;
+
+                    Deck dummyHand = hands[i];
+                    hands[i] = hands[i + 1];
+                    hands[i + 1] = dummyHand;
+
+                    isMixed = true;
+                }
+            }
+        } while(isMixed);
+
+        float runningOdds = 0;
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            if(i > 0 && scores[i] != scores[i - 1]) {
+                weightedTotal += (scores[i - 1] - preScore) * runningOdds;
+                runningOdds = 0;
+            }
+            runningOdds += odds[i];
+        }
+
+        weightedTotal += (scores[numHandsToScore - 1] - preScore) * runningOdds;
+
+        free(scores);
+        free(hands);
+        free(odds);
+
+        return weightedTotal;
+    }
+
+    public:
     string toStringSmall() {
 
         string deckString = "[";
