@@ -189,6 +189,10 @@ class Card {
         return getSuit() == card.getSuit() && getIcon() == card.getIcon() && getRank() == card.getRank();
     }
 
+    string toStringSmall() {
+        return "[" + getIcon() + getSuit() + "]";
+    }
+
     string toString() {
 
         char extraSpace = ' ';

@@ -20,10 +20,13 @@ int main(int argc, char const* argv[]) {
     int handChoice;
 
     do {
-        deck.scoreAllHandsMinusTwoDiscardRisk();
-        Deck* allHands = deck.rankAllPossibilities(false);
+        deck.scoreAllHandsMinusTwo(true);
+        cout << "Enemy's Crib:\n";
+        deck.rankAllPossibilities(false);
+        cout << "Your Crib:\n";
+        Deck* allHands = deck.rankAllPossibilities(true);
+        cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
         do {
-            cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
             cin >> handChoice;
             if(handChoice < 0 || handChoice > numPossibleHands)
                 cout << "Please input a number between 0-" << numPossibleHands << ": ";

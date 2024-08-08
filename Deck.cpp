@@ -495,7 +495,7 @@ class Deck {
         return hands;
     }
 
-    Deck* scoreAllHandsMinusTwoDiscardRisk() {
+    Deck* scoreAllHandsMinusTwo(bool myCrib) {
         int numHandsToScore = numPossibleHands();
 
         int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
@@ -546,89 +546,32 @@ class Deck {
             if(i > 0 && scores[i] != scores[i - 1])
                 cout << "\n";
 
-            int pairDanger = scorePairDanger(giveaways[i]);
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Risk Score: " << pairDanger;
+            if(!myCrib) {
+                int pairDanger = scorePairDanger(giveaways[i]);
+                cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Risk Score: " << pairDanger;
 
-            if(pairDanger == 0)
-                cout << " - NO RISK\n";
-            else if(pairDanger <= 3)
-                cout << " - LOW RISK\n";
-            else if(pairDanger >= 7)
-                cout << " - HIGH RISK\n";
-            else
-                cout << " - MODERATE RISK\n";
-        }
-
-        cout << "\n";
-
-        free(scores);
-        free(giveaways);
-
-        return hands;
-    }
-
-    Deck* scoreAllHandsMinusTwoDiscardBenefit() {
-        int numHandsToScore = numPossibleHands();
-
-        int* scores = (int*)malloc(sizeof(int) * numHandsToScore);
-        Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
-        Deck* giveaways = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
-        int count = 0;
-
-        for(int i = 0; i < numCards; i++) {
-            for(int j = i; j < numCards - 1; j++) {
-                Deck tempDeck(cards, getNumCards());
-                Deck giveaway(0);
-                giveaway.add(tempDeck.getCard(i));
-                giveaway.add(tempDeck.getCard(j + 1));
-                tempDeck.remove(i);
-                tempDeck.remove(j);
-                tempDeck.sort();
-                scores[count] = tempDeck.scoreAll();
-                hands[count] = tempDeck;
-                giveaways[count++] = giveaway;
+                if(pairDanger == 0)
+                    cout << " - NO RISK\n";
+                else if(pairDanger <= 3)
+                    cout << " - LOW RISK\n";
+                else if(pairDanger >= 7)
+                    cout << " - HIGH RISK\n";
+                else
+                    cout << " - MODERATE RISK\n";
             }
-        }
+            else {
+                int pairBenefit = scorePairBenefit(giveaways[i]);
+                cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Benefit Score: " << pairBenefit;
 
-        bool isMixed = false;
-        do {
-            isMixed = false;
-            for(int i = 0; i < numHandsToScore - 1; i++) {
-                if(scores[i] < scores[i + 1]) {
-                    int dummyScore = scores[i];
-                    scores[i] = scores[i + 1];
-                    scores[i + 1] = dummyScore;
-
-                    Deck dummyDiscard = giveaways[i];
-                    giveaways[i] = giveaways[i + 1];
-                    giveaways[i + 1] = dummyDiscard;
-
-                    Deck dummyHand = hands[i];
-                    hands[i] = hands[i + 1];
-                    hands[i + 1] = dummyHand;
-
-                    isMixed = true;
-                }
+                if(pairBenefit == 0)
+                    cout << " - NO REWARD\n";
+                else if(pairBenefit <= 3)
+                    cout << " - LOW REWARD\n";
+                else if(pairBenefit >= 7)
+                    cout << " - HIGH REWARD\n";
+                else
+                    cout << " - MODERATE REWARD\n";
             }
-        } while(isMixed);
-
-        cout << "All possible hands ranked:\n\n";
-
-        for(int i = 0; i < numHandsToScore; i++) {
-            if(i > 0 && scores[i] != scores[i - 1])
-                cout << "\n";
-
-            int pairBenefit = scorePairBenefit(giveaways[i]);
-            cout << "#" << (i + 1) << ": " << scores[i] << "pts - " << hands[i].toStringSmall() << " --- Discarded: " << giveaways[i].toStringSmall() << " Crib Benefit Score: " << pairBenefit;
-
-            if(pairBenefit == 0)
-                cout << " - NO REWARD\n";
-            else if(pairBenefit <= 3)
-                cout << " - LOW REWARD\n";
-            else if(pairBenefit >= 7)
-                cout << " - HIGH REWARD\n";
-            else
-                cout << " - MODERATE REWARD\n";
         }
 
         cout << "\n";
@@ -786,22 +729,12 @@ class Deck {
             if((cardPair.contains(2) && cardPair.contains(3)) || cardPair.contains(10) || cardPair.contains(11) || cardPair.contains(12) || cardPair.contains(13))
                 rewardScore += 1;
             else if(cardPair.contains(7) && cardPair.contains(8))
-                rewardScore += 4;
+                rewardScore += 2;
             else if(cardPair.contains(7) || cardPair.contains(8))
-                rewardScore += 3;
+                rewardScore += 1;
         }
 
-        if(cardPair.getCard(0).getRank() == cardPair.getCard(1).getRank())
-            rewardScore += 3;
-        else if(cardPair.getCard(0).getValue() == cardPair.getCard(1).getValue())
-            rewardScore += 2;
-
-        if(cardPair.cardSum() == 15)
-            rewardScore += 3;
-        else if(cardPair.cardSum() == 5 || cardPair.cardSum() == 10)
-            rewardScore += 1;
-
-        rewardScore += cardPair.scoreAll() * 2;
+        rewardScore += cardPair.scoreAll();
 
         return rewardScore;
     }
@@ -911,8 +844,12 @@ class Deck {
     Deck* rankAllPossibilities(bool myCrib) {
         int numHandsToScore = numPossibleHands();
 
+        int highestBaseScore = 0;
+
         Deck* hands = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
-        float* scoreOverall = (float*)malloc(sizeof(float) * numHandsToScore);
+        float* scoresOverall = (float*)malloc(sizeof(float) * numHandsToScore);
+        Deck* discards = (Deck*)malloc(sizeof(Deck) * numHandsToScore);
+        Card* bestCuts = (Card*)malloc(sizeof(Card) * numHandsToScore);
         int count = 0;
 
         for(int i = 0; i < numCards; i++) {
@@ -927,36 +864,53 @@ class Deck {
                 tempDeck.remove(j);
                 tempDeck.sort();
 
-                cout << tempDeck.toStringSmallln();
+                // cout << tempDeck.toStringSmallln();
 
-                scoreOverall[count] = (float)(((float)tempDeck.scoreAll() / 2.0) + tempDeck.weighAllCuts());
-                cout << "  Base score: " << (tempDeck.scoreAll() / 2.0) << "\n";
-                cout << "+ Weighted Cut Evalutation: " << tempDeck.weighAllCuts() << "\n";
+                int tempScore = tempDeck.scoreAll();
+                if(tempScore > highestBaseScore)
+                    highestBaseScore = tempScore;
+
+                scoresOverall[count] = tempScore / 2.0;
+                // cout << "  Base score: " << (tempDeck.scoreAll() / 2.0) << "\n";
                 if(!myCrib) {
-                    scoreOverall[count] -= ((float)scorePairDanger(giveaway) / 2.0);
-                    cout << "- Discard Danger: " << ((float)scorePairDanger(giveaway) / 2.0);
+                    scoresOverall[count] -= scorePairDanger(giveaway) / 2.0;
+                    // cout << "- Discard Danger: " << ((float)scorePairDanger(giveaway) / 2.0);
                 }
                 else {
-                    scoreOverall[count] += ((float)scorePairBenefit(giveaway) / 2.0);
-                    cout << "+ Discard Benefit: " << ((float)scorePairBenefit(giveaway) / 2.0);
+                    scoresOverall[count] += scorePairBenefit(giveaway) / 2.0;
+                    // cout << "+ Discard Benefit: " << ((float)scorePairBenefit(giveaway) / 2.0);
                 }
-                if(tempDeck.contains(11)) {
-                    scoreOverall[count] += 0.1;
+                if(!myCrib && tempDeck.contains(11)) {
+                    scoresOverall[count] += 0.1;
                 }
+                discards[count] = giveaway;
                 hands[count++] = tempDeck;
-                cout << "\n\n";
+                // cout << "\n\n";
 
             }
+        }
+
+        for(int i = 0; i < numHandsToScore; i++) {
+            scoresOverall[i] += hands[i].weighAllCuts(highestBaseScore, &bestCuts[i]);
+            // cout << "+ Weighted Cut Evalutation: " << hands[i].weighAllCuts(highestBaseScore, &bestCuts[i]) << "\n";
         }
 
         bool isMixed = false;
         do {
             isMixed = false;
             for(int i = 0; i < numHandsToScore - 1; i++) {
-                if(scoreOverall[i] < scoreOverall[i + 1]) {
-                    float dummyScore = scoreOverall[i];
-                    scoreOverall[i] = scoreOverall[i + 1];
-                    scoreOverall[i + 1] = dummyScore;
+                if(scoresOverall[i] < scoresOverall[i + 1]) {
+                    float dummyScore = scoresOverall[i];
+                    scoresOverall[i] = scoresOverall[i + 1];
+                    scoresOverall[i + 1] = dummyScore;
+
+                    Deck dummyDiscard = discards[i];
+                    discards[i] = discards[i + 1];
+                    discards[i + 1] = dummyDiscard;
+
+                    Card dummyCut = bestCuts[i];
+                    bestCuts[i] = bestCuts[i + 1];
+                    bestCuts[i + 1] = dummyCut;
 
                     Deck dummyHand = hands[i];
                     hands[i] = hands[i + 1];
@@ -970,21 +924,25 @@ class Deck {
         cout << "All possible hands ranked:\n\n";
 
         for(int i = 0; i < numHandsToScore; i++) {
-            if(i > 0 && scoreOverall[i] != scoreOverall[i - 1])
+            if(i > 0 && scoresOverall[i] != scoresOverall[i - 1])
                 cout << "\n";
             cout.precision(3);
-            cout << fixed << "#" << (i + 1) << ": " << (i < 9 ? " " : "") << scoreOverall[i] << "pts - " << hands[i].toStringSmallln();
+            cout << fixed << "#" << (i + 1) << ": " << (i < 9 ? " " : "") << scoresOverall[i] << "pts - " << hands[i].toStringSmall() << "   (Best Cut: " << bestCuts[i].toStringSmall() << ") (Discarded: " << discards[i].toStringSmall() << ")\n";
         }
 
         cout << "\n";
+
+        free(bestCuts);
+        free(discards);
+        free(scoresOverall);
 
         return hands;
     }
 
     protected:
-    float weighAllCuts() {
+    float weighAllCuts(int highestBaseScore, Card* bestCutCardRank) {
 
-        int preScore = scoreAll();
+        // int preScore = scoreAll();
         float weightedTotal = 0;
 
         int numHandsToScore = 13;
@@ -1068,17 +1026,19 @@ class Deck {
             }
         } while(isMixed);
 
-        float runningOdds = 0;
+        *bestCutCardRank = hands[0].getCutCard();
 
+        float runningOdds = 0;
         for(int i = 0; i < numHandsToScore; i++) {
             if(i > 0 && scores[i] != scores[i - 1]) {
-                weightedTotal += (scores[i - 1] - preScore) * runningOdds;
+
+                weightedTotal += (scores[i - 1] - highestBaseScore >= 0 ? scores[i - 1] - highestBaseScore : 0) * runningOdds;
                 runningOdds = 0;
             }
             runningOdds += odds[i];
         }
 
-        weightedTotal += (scores[numHandsToScore - 1] - preScore) * runningOdds;
+        weightedTotal += (scores[numHandsToScore - 1] - highestBaseScore >= 0 ? scores[numHandsToScore - 1] - highestBaseScore : 0) * runningOdds;
 
         free(scores);
         free(hands);
