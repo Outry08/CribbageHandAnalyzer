@@ -6,17 +6,62 @@
 int main(int argc, char const* argv[]) {
 
     Deck deck(6);
+    Deck inputDeck(0);
+
+    cout << "Welcome to the Cribbage Hand Analyzer!\nA tool to analyze all the angles of a hand of 4 or 6 cards to help make the right choice of which cards to discard.\nInputting 6 cards allows you to analyze each combination of 4 cards as well as possible cuts with these combinations. Entering 4 cards jumps straight to the cut analysis.";
+    cout << "Please input your hand you would like to analyze.\n(3 of Clubs = 3c) (Example: \"3c, As, 10h, Qd\")\nInput: ";
+    int numCardsInputted = 0;
+    string input;
+    getline(cin, input);
+    do {
+        if(numCardsInputted > 6) {
+            cout << "Number of cards entered exceeded maximum of 6. Please try again: ";
+            numCardsInputted = 0;
+            getline(cin, input);
+        }
+        if(input.length() == 0) {
+            cout << "Number of cards inputted so far: " << numCardsInputted << "\nPlease input ";
+            if(numCardsInputted < 4) {
+                cout << (4 - numCardsInputted);
+                cout << " more cards to reach 4 cards, or ";
+            }
+            cout << (6 - numCardsInputted) << " more cards to reach 6 cards.\nInput: ";
+            getline(cin, input);
+        }
+        cout << input << "\n";
+        string card;
+        if(input.find_first_of(',') != string::npos)
+            card = input.substr(0, input.find_first_of(',') + 1);
+        else
+            card = input;
+        cout << card << "\n";
+        numCardsInputted++;
+
+        string icon = "";
+        icon += card[0];
+        int suitPos = 1;
+        if(card[1] == '0') {
+            icon += '0';
+            suitPos++;
+        }
+
+        string suit = "";
+        suit += card[suitPos];
+
+        if(input.find_first_of(',') != string::npos)
+            input = input.substr(input.find_first_of(',') + (input[input.find_first_of(',') + 1] == ' ' ? 2 : 1));
+        else
+            input = "\0";
+
+        cout << Card(icon, suit, false).toString();
+    } while(!(input.length() == 0 && (numCardsInputted == 4 || numCardsInputted == 6)));
 
     deck.shuffle();
 
     cout << deck.toStringln();
 
-
     int numPossibleHands = deck.numPossibleHands();
 
-    // for(int i = 0; i < numPossibleHands; i++) {
-    //     allHands[i].scoreAllPrint();
-    // }
     int handChoice;
 
     do {
@@ -35,80 +80,6 @@ int main(int argc, char const* argv[]) {
         if(handChoice > 0)
             allHands[handChoice - 1].scoreAllCuts(deck);
     } while(handChoice > 0 && handChoice <= numPossibleHands);
-
-    // Deck deck2(0);
-    // deck2.add(Card("10", "C"));
-    // deck2.add(Card("10", "s"));
-    // deck2.add(Card("J", "c"));
-    // deck2.add(Card("Q", "c"));
-
-    // deck2.scoreAllPrint();
-
-    // Deck deck4(0);
-    // deck4.add(Card("7", "C"));
-    // deck4.add(Card("7", "c"));
-    // deck4.add(Card("8", "c"));
-    // deck4.add(Card("9", "c"));
-    // deck4.add(Card("8", "d", true));
-
-    // deck4.sort();
-    // cout << deck4.toString();
-    // deck4.scoreAllPrint();
-
-    // Deck deck5(0);
-    // deck5.add(Card("7", "C"));
-    // deck5.add(Card("9", "c"));
-    // deck5.add(Card("8", "c"));
-    // deck5.add(Card("9", "c"));
-    // deck5.add(Card("8", "d", true));
-
-    // deck5.sort();
-    // cout << deck5.toString();
-    // deck5.scoreAllPrint();
-
-    // Deck deck6(0);
-    // deck6.add(Card("K", "C"));
-    // deck6.add(Card("9", "c"));
-    // deck6.add(Card("8", "c"));
-    // deck6.add(Card("9", "c"));
-    // deck6.add(Card("8", "d", true));
-
-    // deck6.sort();
-    // cout << deck6.toString();
-    // deck6.scoreAllPrint();
-
-    // Deck deck7(0);
-    // deck7.add(Card("7", "C"));
-    // deck7.add(Card("10", "c"));
-    // deck7.add(Card("8", "c"));
-    // deck7.add(Card("9", "c"));
-    // deck7.add(Card("8", "d", true));
-
-    // deck7.sort();
-    // cout << deck7.toString();
-    // deck7.scoreAllPrint();
-
-    // Deck deck8(0);
-    // deck8.add(Card("7", "C"));
-    // deck8.add(Card("10", "c"));
-    // deck8.add(Card("8", "c"));
-    // deck8.add(Card("9", "c"));
-    // deck8.add(Card("J", "d", true));
-
-    // deck8.sort();
-    // cout << deck8.toString();
-    // deck8.scoreAllPrint();
-
-    // Deck deck3(0);
-    // deck3.add(Card("J", "C"));
-    // deck3.add(Card("5", "c"));
-    // deck3.add(Card("5", "c", true));
-    // deck3.add(Card("5", "c"));
-    // deck3.add(Card("5", "s"));
-
-    // cout << deck3.toString();
-
-    // deck3.scoreAllPrint();
 
     return 0;
 }
