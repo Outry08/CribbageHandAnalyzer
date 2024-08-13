@@ -14,8 +14,11 @@ int main(int argc, char const* argv[]) {
     do {
         cout << "\nPlease input your hand you would like to analyze.\n(3 of Clubs = 3c) (Example: \"3c, As, 10h, Qd\")\nInput: ";
 
+        Deck tempDeck(0);
+
         int numCardsInputted = 0;
         string input;
+
         getline(cin, input);
         do {
             if(numCardsInputted > 6) {
@@ -62,18 +65,47 @@ int main(int argc, char const* argv[]) {
             else
                 input = "\0";
 
-            inputDeck.add(Card(icon, suit, false));
+            if(!inputDeck.contains(Card(icon, suit, false)))
+                inputDeck.add(Card(icon, suit, false));
+            else {
+                cout << "Error: Invalid input format. Please try again: ";
+                inputDeck.removeAll();
+                numCardsInputted = 0;
+                getline(cin, input);
+                continue;
+            }
+
             cout << inputDeck.toStringln();
         } while(!(input.length() == 0 && (numCardsInputted == 4 || numCardsInputted == 6)));
 
+        cout << "Is it your crib, or the enemy's crib?\n"
+            << "1. My crib\n"
+            << "2. Enemy Crib\n"
+            << "Input: ";
+
+        int cribInput;
+        do {
+            cin >> cribInput;
+            if(cribInput < 1 || cribInput > 2)
+                cout << "Error. Please either 1 or 2: ";
+        } while(cribInput < 1 || cribInput > 2);
+
+        bool myCrib = false;
+
+        if(myCrib == 1)
+            myCrib = true;
+
         cout << "\nWhat would you like to do?\n";
-        if(inputDeck.getNumCards() == 6) {
+        if(tempDeck.getNumCards() == 4) {
+            cout << "1. Rank all possible cuts\n"
+                << "2. Go back to original hand of 6\n";
+        }
+        else if(inputDeck.getNumCards() == 6) {
             cout << "1. Choose two discard cards\n"
                 << "2. Rank all possible choices\n";
         }
         else if(inputDeck.getNumCards() == 4) {
-            cout << "1. Rank all possible cuts\n"
-                << "2. Go back to original hand of 6\n";
+            cout << "1. Rank all possible cuts\n";
         }
         cout << "3. Input new deck\n"
             << "0. Exit program\n"
@@ -84,6 +116,88 @@ int main(int argc, char const* argv[]) {
             if(menuChoice < 0 || menuChoice > 3)
                 cout << "Error. Please input a number between 0-3: ";
         } while(menuChoice < 0 || menuChoice > 3);
+
+        getline(cin, input);
+
+        if(menuChoice != 0 && menuChoice != 3) {
+            if(tempDeck.getNumCards() == 4) {
+                if(menuChoice == 1) {
+                    tempDeck.scoreAllCuts();
+                }
+                else if(menuChoice == 2) {
+                    tempDeck.removeAll();
+                }
+            }
+            else if(inputDeck.getNumCards() == 6) {
+                if(menuChoice == 1) {
+                    cout << "\nPlease input the numbers of the two cards you'd like to discard.\n(Between 1-6) (Eg. '1, 4')\nInput: ";
+
+                    int numNumsInputted = 0;
+                    int numbers[2];
+
+                    numbers[0] = 0;
+                    numbers[1] = 0;
+
+                    string input;
+                    getline(cin, input);
+                    do {
+                        if(numNumsInputted > 2) {
+                            cout << "Number of numbers entered exceeded 2. Please try again: ";
+                            numNumsInputted = 0;
+                            numbers[0] = 0;
+                            numbers[1] = 0;
+                            getline(cin, input);
+                        }
+                        if(input.length() == 0) {
+                            cout << "Numbers so far: " << numbers[0] << ", " << numbers[1] << "\n";
+                            cout << "\nPlease input ";
+                            cout << (2 - numNumsInputted) << " more cards to reach 2 numbers.\nInput: ";
+                            getline(cin, input);
+                        }
+
+                        string num;
+                        if(input.find_first_of(',') != string::npos)
+                            num = input.substr(0, input.find_first_of(','));
+                        else
+                            num = input;
+                        cout << num << "\n";
+                        numNumsInputted++;
+
+                        if(!isdigit(num[0]) || stoi(num) < 1 || stoi(num) > 6) {
+                            cout << "Error: Invalid input. Please try again: ";
+                            numNumsInputted = 0;
+                            numbers[0] = 0;
+                            numbers[1] = 0;
+                            getline(cin, input);
+                            continue;
+                        }
+
+                        numbers[numNumsInputted - 1] = stoi(num) - 1;
+
+                        if(input.find_first_of(',') != string::npos)
+                            input = input.substr(input.find_first_of(',') + (input[input.find_first_of(',') + 1] == ' ' ? 2 : 1));
+                        else
+                            input = "\0";
+
+                    } while(!(input.length() == 0 && numNumsInputted == 2));
+
+                    tempDeck = inputDeck;
+                    tempDeck.remove(numbers[0]);
+                    tempDeck.remove(--numbers[1]);
+
+                    cout << tempDeck.toStringln();
+
+                }
+                else if(menuChoice == 2) {
+                    inputDeck.rankAllPossibilities(myCrib);
+                }
+            }
+            else if(inputDeck.getNumCards() == 4) {
+                if(menuChoice == 1) {
+                    inputDeck.scoreAllCuts();
+                }
+            }
+        }
 
     } while(menuChoice == 3);
 
