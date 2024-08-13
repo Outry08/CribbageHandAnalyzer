@@ -121,6 +121,12 @@ class Deck {
         }
     }
 
+    void removeAll() {
+        while(getNumCards() > 0) {
+            remove(0);
+        }
+    }
+
     void add(Card card) {
         if(numCards < 52)
             cards[numCards++] = card;

@@ -27,6 +27,8 @@ class Card {
     }
     Card(string ico, string su) {
         icon = ico;
+        icon[0] = toupper(icon[0]);
+
         if(su == "c" || su == "C")
             su = "♣";
         else if(su == "s" || su == "S")
@@ -60,6 +62,8 @@ class Card {
     }
     Card(string ico, string su, bool cut) {
         icon = ico;
+        icon[0] = toupper(icon[0]);
+
         if(su == "c" || su == "C")
             su = "♣";
         else if(su == "s" || su == "S")
