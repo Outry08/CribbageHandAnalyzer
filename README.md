@@ -16,6 +16,10 @@ An in-depth paragraph about your project and overview of use.
 * Run 'make' command
 * Run program with ./crib
 
+## Visuals
+Ranking all possibilities of a 6-card hand:
+<img src="ranking.png" alt="Hand Rankings">
+
 ## Limitations
 
 ## Author Information
