@@ -1,6 +1,8 @@
 #include "main.h"
 #include "Deck.cpp"
 
+Deck discardTwo(Deck* deck);
+
 //♣ ♠ ♥ ♦
 
 int main(int argc, char const* argv[]) {
@@ -204,7 +206,6 @@ int main(int argc, char const* argv[]) {
                         tempDeck.remove(--numbers[1]);
 
                         cout << tempDeck.toStringln();
-
                     }
                     else if(menuChoice == 2) {
                         inputDeck.rankAllPossibilities(myCrib);
@@ -227,47 +228,117 @@ int main(int argc, char const* argv[]) {
 
         bool playerTurn;
 
-        //Determining turn order -- Need to add logic for tie
+        //Determining turn order
+        do {
+            mainDeck.shuffle();
+            playerDeck.add(mainDeck.getCard(0));
+            cpuDeck.add(mainDeck.getCard(1));
+            if(playerDeck.getCard(0).getRank() < cpuDeck.getCard(0).getRank())
+                playerTurn = true;
+            else if(playerDeck.getCard(0).getRank() > cpuDeck.getCard(0).getRank())
+                playerTurn = false;
+
+            cout << "Player's Card: " << playerDeck.getCard(0).toStringSmall() << "\n";
+            cout << "CPU's Card: " << cpuDeck.getCard(0).toStringSmall() << "\n";
+
+            if(playerDeck.getCard(0).getRank() == cpuDeck.getCard(0).getRank())
+                cout << "It's a Tie!\n";
+
+        } while(playerDeck.getCard(0).getRank() == cpuDeck.getCard(0).getRank());
+
+        cout << "Player's turn: " << (playerTurn ? "True" : "False") << "\n";
+        playerDeck.removeAll();
+        cpuDeck.removeAll();
+
+        //Dealing the 6 cards
         mainDeck.shuffle();
-        playerDeck.add(mainDeck.getCard(0));
-        cpuDeck.add(mainDeck.getCard(1));
-        if(playerDeck.getCard(0).getRank() < cpuDeck.getCard(0).getRank())
-            playerTurn = true;
-        else
-            playerTurn = false;
 
-        cout << "Player's Card: " << playerDeck.getCard(0).toStringSmall() << "\n";
-        cout << "CPU's Card: " << cpuDeck.getCard(0).toStringSmall() << "\n";
+        mainDeck.deal(6, &playerDeck);
+        mainDeck.deal(6, &cpuDeck);
 
-        cout << "Player's turn: " << playerTurn;
+        playerDeck.sort();
+        cpuDeck.sort();
 
+        cout << "Your Hand:\n" << playerDeck.toStringln();
+        cout << "CPU Hand:\n" << cpuDeck.toStringln() << "\n";
+
+        string dummy;
+        getline(cin, dummy);
+
+        //Choosing 2 to discard into crib deck
+        Deck crib = discardTwo(&playerDeck);
+        cout << "Discarded: " << crib.toStringSmallln();
+        cout << "Your chosen hand:\n" << playerDeck.toStringln();
+
+        cpuDeck = cpuDeck.scoreAllHandsMinusTwo(!playerTurn)[0];
+        cout << "CPU's chosen hand:\n" << cpuDeck.toStringln();
     }
 
-    // deck.shuffle();
-    // cout << deck.toStringln();
-
-    // int numPossibleHands = deck.numPossibleHands();
-
-    // int handChoice;
-
-    // do {
-    //     deck.scoreAllHandsMinusTwo(false);
-    //     cout << "Enemy's Crib:\n";
-    //     deck.rankAllPossibilities(false);
-    //     cout << "Your Crib:\n";
-    //     Deck* allHands = deck.rankAllPossibilities(true);
-    //     cout << "Which hand would you like to see the cuts of? (1-" << numPossibleHands << ") (0 to exit): ";
-    //     do {
-    //         cin >> handChoice;
-    //         if(handChoice < 0 || handChoice > numPossibleHands)
-    //             cout << "Please input a number between 0-" << numPossibleHands << ": ";
-    //     } while(handChoice < 0 || handChoice > numPossibleHands);
-
-    //     if(handChoice > 0)
-    //         allHands[handChoice - 1].scoreAllCuts(deck);
-    // } while(handChoice > 0 && handChoice <= numPossibleHands);
-
     return 0;
+}
+
+Deck discardTwo(Deck* deck) {
+
+    cout << "Your hand is:\n" << deck->toStringln();
+    cout << "\nPlease input the numbers of the two cards you'd like to discard.\n(Between 1-6) (Eg. '1, 4')\nInput: ";
+
+    int numNumsInputted = 0;
+    int numbers[2];
+
+    numbers[0] = 0;
+    numbers[1] = 0;
+
+    string input;
+    getline(cin, input);
+    do {
+        if(numNumsInputted > 2) {
+            cout << "Number of numbers entered exceeded 2. Please try again: ";
+            numNumsInputted = 0;
+            numbers[0] = 0;
+            numbers[1] = 0;
+            getline(cin, input);
+        }
+        if(input.length() == 0) {
+            cout << "Numbers so far: " << numbers[0] << ", " << numbers[1] << "\n";
+            cout << "\nPlease input ";
+            cout << (2 - numNumsInputted) << " more cards to reach 2 numbers.\nInput: ";
+            getline(cin, input);
+        }
+
+        string num;
+        if(input.find_first_of(',') != string::npos)
+            num = input.substr(0, input.find_first_of(','));
+        else
+            num = input;
+        cout << num << "\n";
+        numNumsInputted++;
+
+        if(!isdigit(num[0]) || stoi(num) < 1 || stoi(num) > 6) {
+            cout << "Error: Invalid input. Please try again: ";
+            numNumsInputted = 0;
+            numbers[0] = 0;
+            numbers[1] = 0;
+            getline(cin, input);
+            continue;
+        }
+
+        numbers[numNumsInputted - 1] = stoi(num) - 1;
+
+        if(input.find_first_of(',') != string::npos)
+            input = input.substr(input.find_first_of(',') + (input[input.find_first_of(',') + 1] == ' ' ? 2 : 1));
+        else
+            input = "\0";
+
+    } while(!(input.length() == 0 && numNumsInputted == 2));
+
+    Deck discardDeck(0);
+
+    discardDeck.add(deck->getCard(numbers[0]));
+    discardDeck.add(deck->getCard(numbers[1]));
+    deck->remove(numbers[0]);
+    deck->remove(--numbers[1]);
+
+    return discardDeck;
 }
 
 bool isValidIcon(string icon) {
